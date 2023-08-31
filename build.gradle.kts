@@ -1,3 +1,5 @@
+val exposed_version: String by project
+val h2_version: String by project
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -22,11 +24,16 @@ repositories {
 }
 
 dependencies {
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("com.h2database:h2:$h2_version")
     implementation("io.ktor:ktor-server-core-jvm")
     implementation("io.ktor:ktor-server-freemarker-jvm")
     implementation("io.ktor:ktor-server-host-common-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

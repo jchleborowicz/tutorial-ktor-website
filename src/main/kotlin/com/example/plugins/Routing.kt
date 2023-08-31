@@ -1,7 +1,6 @@
 package com.example.plugins
 
-import com.example.models.Article
-import com.example.models.articles
+import com.example.dao.dao
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.freemarker.*
@@ -20,6 +19,7 @@ fun Application.configureRouting() {
         }
         route("/articles") {
             get {
+                val articles = dao.allArticles()
                 call.respond(
                     FreeMarkerContent(
                         template = "index.ftl",
@@ -34,21 +34,20 @@ fun Application.configureRouting() {
                 val formParameters = call.receiveParameters()
                 val title = formParameters.getOrFail("title")
                 val body = formParameters.getOrFail("body")
-                val newEntry = Article.newEntry(title, body)
-                articles.add(newEntry)
-                call.respondRedirect("/articles/${newEntry.id}")
+
+                val createdArticle = dao.addNewArticle(title, body)
+                call.respondRedirect("/articles/${createdArticle!!.id}")
             }
             get("{id}") {
                 val id = call.parameters.getOrFail<Int>("id")
-                val article = articles.find { it.id == id } ?: return@get call.respondText(
-                    "No such article",
-                    status = HttpStatusCode.NotFound
-                )
+                val article = dao.article(id)
+                    ?: return@get call.respondText("No such article", status = HttpStatusCode.NotFound)
+
                 call.respond(FreeMarkerContent("show.ftl", mapOf("article" to article)))
             }
             get("{id}/edit") {
                 val id = call.parameters.getOrFail<Int>("id")
-                val article = articles.find { it.id == id }
+                val article = dao.article(id)
                     ?: return@get call.respondText("Article not found", status = HttpStatusCode.NotFound)
                 call.respond(
                     FreeMarkerContent(
@@ -63,16 +62,16 @@ fun Application.configureRouting() {
                 val action = formParameters.getOrFail("_action")
                 when (action) {
                     "update" -> {
-                        val index = articles.indexOf(articles.find { it.id == id })
                         val title = formParameters.getOrFail("title")
                         val body = formParameters.getOrFail("body")
-                        articles[index].title = title
-                        articles[index].body = body
+
+                        dao.editArticle(id, title, body)
+
                         call.respondRedirect("/articles/${id}")
                     }
 
                     "delete" -> {
-                        articles.removeIf { it.id == id }
+                        dao.deleteArticle(id)
                         call.respondRedirect("/articles")
                     }
 
