@@ -18,9 +18,8 @@ class DAOFacadeImpl : DAOFacade {
 
 
     override suspend fun article(id: Int): Article? = dbQuery {
-        Articles.select {
-            Articles.id eq id
-        }
+        Articles
+            .select { Articles.id eq id }
             .map(::resultRowToArticle)
             .singleOrNull()
     }

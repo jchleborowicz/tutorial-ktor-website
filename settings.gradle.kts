@@ -1,1 +1,1 @@
-rootProject.name = "tutorial-website"
+rootProject.name = "tutorial-ktor-website"
