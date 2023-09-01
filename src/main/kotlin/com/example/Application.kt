@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
 
 @Suppress("unused")
 fun Application.module() {
-    DatabaseFactory.init()
+    DatabaseFactory.init(environment.config)
     configureTemplating()
     configureRouting()
 }
