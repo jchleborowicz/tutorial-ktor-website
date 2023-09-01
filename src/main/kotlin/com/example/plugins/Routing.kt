@@ -17,18 +17,11 @@ fun Application.configureRouting() {
         get("/") {
             call.respondRedirect("articles")
         }
-        route("/articles") {
+        route("articles") {
             get {
                 val articles = dao.allArticles()
-                call.respond(
-                    FreeMarkerContent(
-                        template = "index.ftl",
-                        model = mapOf("articles" to articles)
-                    )
-                )
-            }
-            get("new") {
-                call.respond(FreeMarkerContent("new.ftl", model = null))
+                val content = FreeMarkerContent("index.ftl", mapOf("articles" to articles))
+                call.respond(content)
             }
             post {
                 val formParameters = call.receiveParameters()
@@ -44,17 +37,6 @@ fun Application.configureRouting() {
                     ?: return@get call.respondText("No such article", status = HttpStatusCode.NotFound)
 
                 call.respond(FreeMarkerContent("show.ftl", mapOf("article" to article)))
-            }
-            get("{id}/edit") {
-                val id = call.parameters.getOrFail<Int>("id")
-                val article = dao.article(id)
-                    ?: return@get call.respondText("Article not found", status = HttpStatusCode.NotFound)
-                call.respond(
-                    FreeMarkerContent(
-                        template = "edit.ftl",
-                        model = mapOf("article" to article)
-                    )
-                )
             }
             post("{id}") {
                 val id = call.parameters.getOrFail<Int>("id")
@@ -77,6 +59,21 @@ fun Application.configureRouting() {
 
                     else -> throw RuntimeException("Unknown action ${action}")
                 }
+            }
+            get("new") {
+                val content = FreeMarkerContent("new.ftl", model = null)
+                call.respond(content)
+            }
+            get("{id}/edit") {
+                val id = call.parameters.getOrFail<Int>("id")
+                val article = dao.article(id)
+                    ?: return@get call.respondText("Article not found", status = HttpStatusCode.NotFound)
+                call.respond(
+                    FreeMarkerContent(
+                        template = "edit.ftl",
+                        model = mapOf("article" to article)
+                    )
+                )
             }
         }
     }
